@@ -43,9 +43,12 @@ public class RequestSpec {
 	}
 
 	public RequestSpec bind(String parameterName, Object parameterValue) {
+		if (this.resource.resourceSpec.parameters == null || this.resource.resourceSpec.parameters.isEmpty())
+			throw new IllegalArgumentException(String.format("There is no parameter in client specification.", parameterName));
+		ParameterSpec parameterSpec = this.resource.resourceSpec.parameters.get(parameterName);
+		if (parameterSpec == null) throw new IllegalArgumentException(String.format("The \"%s\" parameter isn't in client specification.", parameterName));
+
 		if (parameterValue != null) {
-			ParameterSpec parameterSpec = this.resource.resourceSpec.parameters.get(parameterName);
-			if (parameterSpec == null) throw new IllegalArgumentException(String.format("The \"%s\" parameter isn't in client specification.", parameterName));
 			if (this.parameters == null) this.parameters = new HashMap<>();
 			if (this.parameters.containsKey(parameterName)) this.parameters.get(parameterName).add(parameterValue);
 			else
@@ -56,7 +59,6 @@ public class RequestSpec {
 
 	public RequestSpec body(Object content) {
 		if (resource.resourceSpec.bodySerializer == null) throw new IllegalArgumentException("The resource spec don't defines a body serializer and shouldn't write an body content.");
-		if (resource.resourceSpec.hasFormParameters()) throw new IllegalArgumentException("The resource spec defines Form Parameters and shouldn't write an body content. User bind method instead.");
 		this.content = content;
 		return this;
 	}
@@ -64,15 +66,19 @@ public class RequestSpec {
 	public RequestSpec validate() throws ClientSideValidationException {
 		if (this.sent) throw new IllegalStateException("This request has already completed and can't be sent again.");
 		List<Detail> details = new ArrayList<>();
-		for (Entry<String, ParameterSpec> paramEntry : resource.resourceSpec.parameters.entrySet()) {
-			ParameterSpec param = paramEntry.getValue();
-			List<Object> values = this.parameters.get(param.name);
-			if (param.required && param.defaultValue == null && (values == null || values.isEmpty())) details.add(new Detail(param, Failure.MISSING, null));
-			if (param.type == ParameterType.PATH && values != null && values.size() > 1) details.add(new Detail(param, Failure.INVALID_SIZE, values.size()));
-			if (param.regex != null && values != null && !values.isEmpty()) {
-				for (Object value : values) {
-					if (!Pattern.matches(param.regex, value.toString())) {
-						details.add(new Detail(param, Failure.INVALID, value));
+		if (this.resource.resourceSpec.bodySerializer != null && this.content == null) details.add(new Detail(null, Failure.MISSING_BODY, null));
+		if (resource.resourceSpec.parameters != null) {
+			if (this.parameters == null) this.parameters = new HashMap<>();
+			for (Entry<String, ParameterSpec> paramEntry : resource.resourceSpec.parameters.entrySet()) {
+				ParameterSpec param = paramEntry.getValue();
+				List<Object> values = this.parameters.get(param.name);
+				if (param.required && param.defaultValue == null && (values == null || values.isEmpty())) details.add(new Detail(param, Failure.MISSING, null));
+				if (param.type == ParameterType.PATH && values != null && values.size() > 1) details.add(new Detail(param, Failure.INVALID_SIZE, values.size()));
+				if (param.regex != null && values != null && !values.isEmpty()) {
+					for (Object value : values) {
+						if (!Pattern.matches(param.regex, value.toString())) {
+							details.add(new Detail(param, Failure.INVALID, value));
+						}
 					}
 				}
 			}

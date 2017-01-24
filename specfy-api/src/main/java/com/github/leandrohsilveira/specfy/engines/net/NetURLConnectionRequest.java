@@ -4,14 +4,11 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-
-import org.apache.commons.io.IOUtils;
 
 import com.github.leandrohsilveira.specfy.Request;
 import com.github.leandrohsilveira.specfy.RequestMethod;
@@ -34,6 +31,7 @@ public class NetURLConnectionRequest implements Request {
 		return this.charset;
 	}
 
+	@Override
 	public void setSslContext(SSLContext sslContext) {
 		if (this.connection instanceof HttpsURLConnection) {
 			((HttpsURLConnection) this.connection).setSSLSocketFactory(sslContext.getSocketFactory());
@@ -55,13 +53,7 @@ public class NetURLConnectionRequest implements Request {
 	}
 
 	@Override
-	public void writeFormParameter(String param) throws IOException {
-		String encoded = URLEncoder.encode(param, this.charset.name());
-		IOUtils.write(encoded, this.connection.getOutputStream(), this.charset);
-	}
-
-	@Override
-	public void writeSerializable(Serializer serializer, Object content) throws IOException {
+	public void writeBody(Serializer serializer, Object content) throws IOException {
 		serializer.serialize(content, this.connection.getOutputStream());
 	}
 

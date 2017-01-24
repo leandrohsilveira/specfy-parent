@@ -81,16 +81,28 @@ public class ResourceSpec extends Composer {
 		return attribute(new ParameterSpec(ParameterType.HEADER, header.getHeaderName(), regex, required));
 	}
 
+	public ResourceSpec header(String headerName, String regex, boolean required, Object defaultValue) {
+		return attribute(new ParameterSpec(ParameterType.HEADER, headerName, regex, required, defaultValue));
+	}
+
+	public ResourceSpec header(Header header, String regex, boolean required, Object defaultValue) {
+		return attribute(new ParameterSpec(ParameterType.HEADER, header.getHeaderName(), regex, required, defaultValue));
+	}
+
 	public ResourceSpec queryParameter(String parameterName, String regex) {
 		return attribute(new ParameterSpec(ParameterType.QUERY, parameterName, regex, false));
 	}
 
-	public ResourceSpec formParameter(String parameterName, String regex, boolean required) {
-		return attribute(new ParameterSpec(ParameterType.FORM, parameterName, regex, required));
+	public ResourceSpec queryParameter(String parameterName, String regex, Object defaultValue) {
+		return attribute(new ParameterSpec(ParameterType.QUERY, parameterName, regex, false, defaultValue));
 	}
 
 	public ResourceSpec cookie(String cookieName, String regex, boolean required) {
 		return attribute(new ParameterSpec(ParameterType.COOKIE, cookieName, regex, required));
+	}
+
+	public ResourceSpec cookie(String cookieName, String regex, boolean required, Object defaultValue) {
+		return attribute(new ParameterSpec(ParameterType.COOKIE, cookieName, regex, required, defaultValue));
 	}
 
 	public ResourceSpec fixedHeader(Header header, Object value) {
@@ -122,15 +134,6 @@ public class ResourceSpec extends Composer {
 				attribute(entry.getValue());
 		}
 		return this;
-	}
-
-	protected boolean hasFormParameters() {
-		if (this.parameters == null) return false;
-		for (Entry<String, ParameterSpec> entry : this.parameters.entrySet()) {
-			if (entry.getValue().type != ParameterType.FORM)
-				return true;
-		}
-		return false;
 	}
 
 	@Override

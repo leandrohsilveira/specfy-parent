@@ -8,7 +8,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,7 +26,6 @@ public abstract class AbstractEngine implements Engine {
 		Charset charset = requestSpec.resource.resourceSpec.client.charset;
 
 		Map<String, List<Object>> headers = null;
-		Map<String, List<Object>> forms = null;
 		Map<String, List<Object>> cookies = null;
 
 		try {
@@ -41,10 +39,6 @@ public abstract class AbstractEngine implements Engine {
 					case COOKIE:
 						if (cookies == null) cookies = new HashMap<>();
 						cookies.put(paramName, values);
-						break sw;
-					case FORM:
-						if (forms == null) forms = new HashMap<>();
-						forms.put(paramName, values);
 						break sw;
 					case HEADER:
 						if (headers == null) headers = new HashMap<>();
@@ -67,7 +61,9 @@ public abstract class AbstractEngine implements Engine {
 
 			request.setMethod(requestSpec.resource.method);
 
-			applyBody(requestSpec, forms, request);
+			applySslContext(requestSpec, request);
+
+			applyBody(requestSpec, request);
 
 			applyHeaders(headers, request);
 
@@ -85,6 +81,11 @@ public abstract class AbstractEngine implements Engine {
 		}
 
 		return null;
+	}
+
+	private void applySslContext(RequestSpec requestSpec, Request request) {
+		if (requestSpec.sslContext != null) request.setSslContext(requestSpec.sslContext);
+		else if (requestSpec.resource.resourceSpec.client.defaultSslContext != null) request.setSslContext(requestSpec.resource.resourceSpec.client.defaultSslContext);
 	}
 
 	private List<Object> getParameterValues(RequestSpec request, ParameterSpec parameterSpec) {
@@ -126,25 +127,10 @@ public abstract class AbstractEngine implements Engine {
 		}
 	}
 
-	private void applyBody(RequestSpec requestSpec, Map<String, List<Object>> forms, Request request) throws IOException, UnsupportedEncodingException {
-		if (requestSpec.resource.resourceSpec.hasFormParameters() || requestSpec.content != null) {
-			if (requestSpec.content == null) {
-				applyBodyForm(forms, request);
-			} else {
-				request.setContentType(requestSpec.resource.resourceSpec.bodySerializer.getContentType());
-				request.writeSerializable(requestSpec.resource.resourceSpec.bodySerializer, requestSpec.content);
-			}
-		}
-	}
-
-	private void applyBodyForm(Map<String, List<Object>> forms, Request request) throws IOException, UnsupportedEncodingException {
-		request.setContentType("application/x-www-form-urlencoded");
-		if (forms != null) for (Entry<String, List<Object>> formEntry : forms.entrySet()) {
-			for (Iterator<Object> valueIterator = formEntry.getValue().iterator(); valueIterator.hasNext();) {
-				Object value = valueIterator.next();
-				String param = String.format("%s=%s%s", formEntry.getKey(), value.toString(), valueIterator.hasNext() ? "&" : "");
-				request.writeFormParameter(param);
-			}
+	private void applyBody(RequestSpec requestSpec, Request request) throws IOException, UnsupportedEncodingException {
+		if (requestSpec.resource.resourceSpec.bodySerializer != null || requestSpec.content != null) {
+			request.setContentType(requestSpec.resource.resourceSpec.bodySerializer.getContentType());
+			request.writeBody(requestSpec.resource.resourceSpec.bodySerializer, requestSpec.content);
 		}
 	}
 

@@ -3,16 +3,15 @@ package com.github.leandrohsilveira.specfy;
 public class ParameterSpec {
 
 	protected ParameterSpec(ParameterType type, String name, String regex, boolean required) {
-		this(type, name, regex, null);
-		this.required = required;
+		this(type, name, regex, required, null);
 	}
 
-	protected ParameterSpec(ParameterType type, String name, String regex, Object defaultValue) {
+	protected ParameterSpec(ParameterType type, String name, String regex, boolean required, Object defaultValue) {
 		this.type = type;
 		this.name = name;
 		this.regex = regex;
 		this.defaultValue = defaultValue;
-		this.required = true;
+		this.required = required;
 		this.fixed = false;
 	}
 

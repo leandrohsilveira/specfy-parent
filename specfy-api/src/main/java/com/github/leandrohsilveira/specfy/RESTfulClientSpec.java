@@ -1,8 +1,5 @@
 package com.github.leandrohsilveira.specfy;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,10 +7,10 @@ import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.commons.io.IOUtils;
-
 import com.github.leandrohsilveira.specfy.Spec.SpecSchema.SpecHost;
 import com.github.leandrohsilveira.specfy.engines.net.NetURLConnectionEngine;
+import com.github.leandrohsilveira.specfy.serialization.serializers.DefaultStringSerializationSet;
+import com.github.leandrohsilveira.specfy.serialization.serializers.WwwFormUrlEncodedSerializer;
 
 public class RESTfulClientSpec {
 
@@ -25,10 +22,15 @@ public class RESTfulClientSpec {
 
 	protected Charset charset = Charset.forName("UTF-8");
 
+	@Override
+	public String toString() {
+		return String.format("RESTful Client Root: %s", resourcesRoot);
+	}
+
 	protected RESTfulClientSpec(SpecHost resourceHost, String resourcesRoot) {
 		this.resourcesRoot = safeConcat(resourceHost.compose(), resourcesRoot);
-		register(new DefaultStringSerializer());
-		register(new DefaultStringDeserializer());
+		register(new DefaultStringSerializationSet());
+		register(new WwwFormUrlEncodedSerializer(this.charset));
 	}
 
 	protected static String safeConcat(String baseString, String concat) {
@@ -72,6 +74,10 @@ public class RESTfulClientSpec {
 		return new ResourceSpec(this, resource);
 	}
 
+	public ResourceSpec resource() {
+		return resource("");
+	}
+
 	public Charset getCharset() {
 		return charset;
 	}
@@ -89,48 +95,6 @@ public class RESTfulClientSpec {
 	public RESTfulClientSpec setDefaultSslContext(SSLContext defaultSslContext) {
 		this.defaultSslContext = defaultSslContext;
 		return this;
-	}
-
-	protected class DefaultStringSerializer implements Serializer {
-
-		@Override
-		public String getContentType() {
-			return "text/plain";
-		}
-
-		@Override
-		public void serialize(Object obj, OutputStream requestBody) throws IOException {
-			IOUtils.write(((String) obj), requestBody, RESTfulClientSpec.this.charset);
-		}
-
-		@Override
-		public Class<?> getSerializableClass() {
-			return String.class;
-		}
-
-	}
-
-	protected class DefaultStringDeserializer implements Deserializer<String> {
-
-		@Override
-		public String getContentType() {
-			return "text/plain";
-		}
-
-		@Override
-		public String deserialize(InputStream responseInput) throws IOException {
-			try {
-				return IOUtils.toString(responseInput, RESTfulClientSpec.this.charset);
-			} finally {
-				IOUtils.closeQuietly(responseInput);
-			}
-		}
-
-		@Override
-		public Class<String> getSerializableClass() {
-			return String.class;
-		}
-
 	}
 
 }

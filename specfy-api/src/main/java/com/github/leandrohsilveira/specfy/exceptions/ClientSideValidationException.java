@@ -42,15 +42,17 @@ public class ClientSideValidationException extends Exception {
 					return String.format("The %s parameter \"%s\" value \"%s\" is invalid for pattern %s.", parameterSpec.getType().name().toLowerCase(), parameterSpec.getName(), Objects.toString(value), parameterSpec.getRegex());
 				case INVALID_SIZE:
 					return String.format("The %s parameter \"%s\" exceeded the values limit of 1 providing %s values.", parameterSpec.getType().name().toLowerCase(), parameterSpec.getName(), Objects.toString(value));
+				case MISSING_BODY:
+					return "The required request body were not provided";
 				case MISSING:
 				default:
-					return String.format("The required %s parameter \"%s\" was not provided.", parameterSpec.getType().name().toLowerCase(), parameterSpec.getName());
+					return String.format("The required %s parameter \"%s\" were not provided.", parameterSpec.getType().name().toLowerCase(), parameterSpec.getName());
 			}
 		}
 
 		public static enum Failure {
 
-			MISSING, INVALID, INVALID_SIZE;
+			MISSING, INVALID, INVALID_SIZE, MISSING_BODY;
 
 		}
 

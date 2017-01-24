@@ -1,4 +1,4 @@
-package com.github.leandrohsilveira.specfy.set;
+package com.github.leandrohsilveira.specfy.sets;
 
 import java.nio.charset.Charset;
 
