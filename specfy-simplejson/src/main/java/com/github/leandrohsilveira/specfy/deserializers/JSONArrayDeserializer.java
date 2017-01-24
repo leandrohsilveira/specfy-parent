@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 
+import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -24,6 +25,8 @@ public class JSONArrayDeserializer extends AbstracJsonDeserializer<JSONArray> {
 			return (JSONArray) new JSONParser().parse(new InputStreamReader(responseInput, charset));
 		} catch (ParseException e) {
 			throw new IOException(e.getMessage(), e);
+		} finally {
+			IOUtils.closeQuietly(responseInput);
 		}
 	}
 
