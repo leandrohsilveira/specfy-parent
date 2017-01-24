@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<ThresholdFilter level="info" onMatch="ACCEPT"
+				onMismatch="DENY" />
+			<PatternLayout>
+				<Pattern>%d{DEFAULT} %-5p %c:%L: %m%n</Pattern>
+			</PatternLayout>
+		</Console>
+
+
+
+
+		<Async name="ASYNC" includeLocation="true">
+<!-- 			<AppenderRef ref="infoLog" /> -->
+<!-- 			<AppenderRef ref="debugLog" /> -->
+			<AppenderRef ref="console" />
+		</Async>
+	</Appenders>
+	<Loggers>
+		<Root level="info">
+			<AppenderRef ref="ASYNC" />
+		</Root>
+	</Loggers>
+
+</Configuration>
