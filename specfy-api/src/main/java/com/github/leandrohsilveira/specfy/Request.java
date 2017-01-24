@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.net.ssl.SSLContext;
 
-import com.github.leandrohsilveira.specfy.exceptions.ClientException;
+import com.github.leandrohsilveira.specfy.exceptions.ClientSpecException;
 
 public interface Request extends Closeable {
 
@@ -15,7 +15,7 @@ public interface Request extends Closeable {
 
 	void setSslContext(SSLContext sslContext);
 
-	void setMethod(RequestMethod method) throws ClientException;
+	void setMethod(RequestMethod method) throws ClientSpecException;
 
 	void setContentType(String contentType);
 

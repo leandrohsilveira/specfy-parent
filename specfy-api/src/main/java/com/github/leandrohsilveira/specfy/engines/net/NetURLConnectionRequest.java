@@ -14,7 +14,7 @@ import com.github.leandrohsilveira.specfy.Request;
 import com.github.leandrohsilveira.specfy.RequestMethod;
 import com.github.leandrohsilveira.specfy.Response;
 import com.github.leandrohsilveira.specfy.Serializer;
-import com.github.leandrohsilveira.specfy.exceptions.ClientException;
+import com.github.leandrohsilveira.specfy.exceptions.ClientSpecException;
 
 public class NetURLConnectionRequest implements Request {
 
@@ -39,11 +39,11 @@ public class NetURLConnectionRequest implements Request {
 	}
 
 	@Override
-	public void setMethod(RequestMethod method) throws ClientException {
+	public void setMethod(RequestMethod method) throws ClientSpecException {
 		try {
 			this.connection.setRequestMethod(method.name());
 		} catch (ProtocolException e) {
-			throw new ClientException(e.getMessage(), e);
+			throw new ClientSpecException(e.getMessage(), e);
 		}
 	}
 
@@ -54,6 +54,7 @@ public class NetURLConnectionRequest implements Request {
 
 	@Override
 	public void writeBody(Serializer serializer, Object content) throws IOException {
+		this.connection.setDoOutput(true);
 		serializer.serialize(content, this.connection.getOutputStream());
 	}
 

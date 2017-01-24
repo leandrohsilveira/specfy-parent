@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.leandrohsilveira.specfy.exceptions.ClientSideValidationException;
+import com.github.leandrohsilveira.specfy.exceptions.ValidationException;
 import com.github.leandrohsilveira.specfy.serialization.WwwFormUrlEncoded;
 
 public class ResourceSpecTest {
@@ -86,7 +86,7 @@ public class ResourceSpecTest {
 		completeFindAllUsers.newRequest().bind("page", 1).bind("max", 10).bind("query", "I'm work");
 	}
 
-	@Test(expected = ClientSideValidationException.class)
+	@Test(expected = ValidationException.class)
 	public void pathParameterNotBoundTest() throws Exception {
 
 		// Path parameters are required by default
@@ -97,7 +97,7 @@ public class ResourceSpecTest {
 
 	}
 
-	@Test(expected = ClientSideValidationException.class)
+	@Test(expected = ValidationException.class)
 	public void pathParameterBoundTwiceTest() throws Exception {
 
 		ResourceActionSpec getUser = root.resource("users").pathParameter("userId", NUMBER_REGEX).isGET();
@@ -108,7 +108,7 @@ public class ResourceSpecTest {
 
 	}
 
-	@Test(expected = ClientSideValidationException.class)
+	@Test(expected = ValidationException.class)
 	public void requiredParameterNotBoundTest() throws Exception {
 
 		// Creating a resource where the Authorization Header is required
@@ -149,7 +149,7 @@ public class ResourceSpecTest {
 		createUser.newRequest().body(new WwwFormUrlEncoded().bind("username", "test").bind("password", "test123")).validate();
 	}
 
-	@Test(expected = ClientSideValidationException.class)
+	@Test(expected = ValidationException.class)
 	public void requiredRequestBodyNotBoundTest() throws Exception {
 		ResourceActionSpec createUser = root.resource("users").isPOST(WwwFormUrlEncoded.class);
 		createUser.newRequest().validate();

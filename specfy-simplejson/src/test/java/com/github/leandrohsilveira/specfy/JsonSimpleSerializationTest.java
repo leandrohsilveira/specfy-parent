@@ -4,7 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Test;
 
-import com.github.leandrohsilveira.specfy.exceptions.ClientSideValidationException;
+import com.github.leandrohsilveira.specfy.exceptions.ValidationException;
 import com.github.leandrohsilveira.specfy.sets.JsonSimpleSerializationSet;
 
 public class JsonSimpleSerializationTest {
@@ -25,7 +25,7 @@ public class JsonSimpleSerializationTest {
 		createUser.newRequest().body(user).validate();
 	}
 
-	@Test(expected = ClientSideValidationException.class)
+	@Test(expected = ValidationException.class)
 	@SuppressWarnings("unchecked")
 	public void jsonSimpleRequiredBodyNotBoundTest() throws Exception {
 		ResourceActionSpec createUser = root.resource("users").isPOST(JSONObject.class);

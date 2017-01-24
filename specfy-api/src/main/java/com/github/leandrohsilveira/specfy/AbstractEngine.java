@@ -13,15 +13,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
-import com.github.leandrohsilveira.specfy.exceptions.ClientException;
-import com.github.leandrohsilveira.specfy.exceptions.ClientSideValidationException;
+import com.github.leandrohsilveira.specfy.exceptions.ClientSpecException;
+import com.github.leandrohsilveira.specfy.exceptions.ValidationException;
 
 public abstract class AbstractEngine implements Engine {
 
 	public abstract Request createRequest(String url, Charset charset) throws IOException;
 
 	@Override
-	public Response send(RequestSpec requestSpec) throws ClientSideValidationException, ClientException {
+	public Response send(RequestSpec requestSpec) throws ValidationException, ClientSpecException {
 		String rawUrl = requestSpec.resource.resourceSpec.compose();
 		Charset charset = requestSpec.resource.resourceSpec.client.charset;
 
@@ -63,11 +63,11 @@ public abstract class AbstractEngine implements Engine {
 
 			applySslContext(requestSpec, request);
 
-			applyBody(requestSpec, request);
-
 			applyHeaders(headers, request);
 
 			applyCookies(cookies, request);
+
+			applyBody(requestSpec, request);
 
 			return request.getResponse();
 

@@ -11,10 +11,13 @@ import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
 
-import com.github.leandrohsilveira.specfy.exceptions.ClientException;
-import com.github.leandrohsilveira.specfy.exceptions.ClientSideValidationException;
-import com.github.leandrohsilveira.specfy.exceptions.ClientSideValidationException.Detail;
-import com.github.leandrohsilveira.specfy.exceptions.ClientSideValidationException.Detail.Failure;
+import com.github.leandrohsilveira.specfy.exceptions.ClientSpecException;
+import com.github.leandrohsilveira.specfy.exceptions.ResponseException;
+import com.github.leandrohsilveira.specfy.exceptions.ValidationException;
+import com.github.leandrohsilveira.specfy.exceptions.ValidationException.Detail;
+import com.github.leandrohsilveira.specfy.exceptions.ValidationException.Detail.Failure;
+import com.github.leandrohsilveira.specfy.exceptions.http.ClientError;
+import com.github.leandrohsilveira.specfy.exceptions.http.ServerError;
 
 public class RequestSpec {
 
@@ -63,7 +66,7 @@ public class RequestSpec {
 		return this;
 	}
 
-	public RequestSpec validate() throws ClientSideValidationException {
+	public RequestSpec validate() throws ValidationException {
 		if (this.sent) throw new IllegalStateException("This request has already completed and can't be sent again.");
 		List<Detail> details = new ArrayList<>();
 		if (this.resource.resourceSpec.bodySerializer != null && this.content == null) details.add(new Detail(null, Failure.MISSING_BODY, null));
@@ -84,39 +87,22 @@ public class RequestSpec {
 			}
 		}
 		if (!details.isEmpty()) {
-			throw new ClientSideValidationException(String.format("The validation for request \"%s\" failed with %d messages", resource.toString(), details.size()), details);
+			throw new ValidationException(String.format("The validation for request \"%s\" failed with %d messages", resource.toString(), details.size()), details);
 		}
 		return this;
 	}
 
-	public RequestSpec send() throws ClientSideValidationException, ClientException {
+	public RequestSpec send() throws ValidationException, ClientSpecException, ClientError, ServerError {
 		validate();
 		response = resource.resourceSpec.client.engine.send(this);
 		sent = true;
+		ResponseException.checkResponseStatus(this);
 		return this;
 	}
 
 	public Response getResponse() {
 		if (!this.sent) throw new IllegalStateException("The request was not sent yet.");
-		checkResponseStatus();
 		return response;
-	}
-
-	private void checkResponseStatus() {
-		int status = this.response.getStatus();
-		if (status >= 400) {
-			switch (status) {
-				case 400:
-					break;
-
-				default:
-					break;
-			}
-		}
-	}
-
-	public <S, E> ResponseOptional<S, E> getDeserializedResponseBody(Class<S> successClass, Class<E> errorClass) {
-		return new ResponseOptional<>(this, successClass, errorClass);
 	}
 
 	@SuppressWarnings("unchecked")

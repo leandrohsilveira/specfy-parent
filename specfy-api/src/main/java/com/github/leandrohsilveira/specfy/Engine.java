@@ -1,10 +1,10 @@
 package com.github.leandrohsilveira.specfy;
 
-import com.github.leandrohsilveira.specfy.exceptions.ClientException;
-import com.github.leandrohsilveira.specfy.exceptions.ClientSideValidationException;
+import com.github.leandrohsilveira.specfy.exceptions.ClientSpecException;
+import com.github.leandrohsilveira.specfy.exceptions.ValidationException;
 
 public interface Engine {
 
-	public Response send(RequestSpec request) throws ClientSideValidationException, ClientException;
+	public Response send(RequestSpec request) throws ValidationException, ClientSpecException;
 
 }

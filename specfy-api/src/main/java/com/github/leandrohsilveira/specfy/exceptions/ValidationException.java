@@ -5,11 +5,11 @@ import java.util.Objects;
 
 import com.github.leandrohsilveira.specfy.ParameterSpec;
 
-public class ClientSideValidationException extends Exception {
+public class ValidationException extends Exception {
 
 	private static final long serialVersionUID = 5806848335908711181L;
 
-	public ClientSideValidationException(String message, List<Detail> details) {
+	public ValidationException(String message, List<Detail> details) {
 		super(message);
 		this.details = details;
 	}
