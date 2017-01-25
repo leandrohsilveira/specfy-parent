@@ -8,6 +8,8 @@ public interface Response extends Closeable {
 
 	List<String> getHeader(Header header);
 
+	String getHeader(Header header, int index);
+
 	int getStatus();
 
 	String getStatusText();

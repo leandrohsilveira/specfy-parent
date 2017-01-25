@@ -11,7 +11,9 @@ import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
 
-import com.github.leandrohsilveira.specfy.exceptions.ClientSpecException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.leandrohsilveira.specfy.exceptions.ResponseException;
 import com.github.leandrohsilveira.specfy.exceptions.ValidationException;
 import com.github.leandrohsilveira.specfy.exceptions.ValidationException.Detail;
@@ -21,12 +23,17 @@ import com.github.leandrohsilveira.specfy.exceptions.http.ServerError;
 
 public class RequestSpec {
 
-	protected RequestSpec(ResourceActionSpec resource) {
+	private static final Logger LOG = LoggerFactory.getLogger(RequestSpec.class);
+
+	protected RequestSpec(ResourceActionSpec resourceActionSpec, String host) {
 		super();
-		this.resource = resource;
+		this.resourceActionSpec = resourceActionSpec;
+		this.host = host;
 	}
 
-	protected ResourceActionSpec resource;
+	protected String host;
+
+	protected ResourceActionSpec resourceActionSpec;
 
 	protected Map<String, List<Object>> parameters;
 
@@ -40,15 +47,18 @@ public class RequestSpec {
 
 	private Object deserializedResponseBody;
 
+	protected Serializer serializer;
+
 	public RequestSpec useSsl(SSLContext sslContext) {
 		this.sslContext = sslContext;
 		return this;
 	}
 
 	public RequestSpec bind(String parameterName, Object parameterValue) {
-		if (this.resource.resourceSpec.parameters == null || this.resource.resourceSpec.parameters.isEmpty())
+		LOG.debug("Binding {} to parameter {}", parameterValue, parameterName);
+		if (this.resourceActionSpec.resourceSpec.parameters == null || this.resourceActionSpec.resourceSpec.parameters.isEmpty())
 			throw new IllegalArgumentException(String.format("There is no parameter in client specification.", parameterName));
-		ParameterSpec parameterSpec = this.resource.resourceSpec.parameters.get(parameterName);
+		ParameterSpec parameterSpec = this.resourceActionSpec.resourceSpec.parameters.get(parameterName);
 		if (parameterSpec == null) throw new IllegalArgumentException(String.format("The \"%s\" parameter isn't in client specification.", parameterName));
 
 		if (parameterValue != null) {
@@ -61,18 +71,24 @@ public class RequestSpec {
 	}
 
 	public RequestSpec body(Object content) {
-		if (resource.resourceSpec.bodySerializer == null) throw new IllegalArgumentException("The resource spec don't defines a body serializer and shouldn't write an body content.");
-		this.content = content;
+		LOG.debug("Setting body content {}");
+		if (content != null) {
+			serializer = this.resourceActionSpec.resourceSpec.client.getSerializer(content.getClass());
+			if (serializer == null) serializer = this.resourceActionSpec.resourceSpec.getSerializer();
+			if (serializer == null) throw new IllegalArgumentException(String.format("No suitable serializer found for class %s or content-type %s", content.getClass().getName(), resourceActionSpec.resourceSpec.contentType));
+			this.content = content;
+		}
 		return this;
 	}
 
 	public RequestSpec validate() throws ValidationException {
 		if (this.sent) throw new IllegalStateException("This request has already completed and can't be sent again.");
+		LOG.debug("Stating Request validation");
 		List<Detail> details = new ArrayList<>();
-		if (this.resource.resourceSpec.bodySerializer != null && this.content == null) details.add(new Detail(null, Failure.MISSING_BODY, null));
-		if (resource.resourceSpec.parameters != null) {
+		if (this.resourceActionSpec.resourceSpec.isBodyRequired() && this.content == null) details.add(new Detail(null, Failure.MISSING_BODY, null));
+		if (resourceActionSpec.resourceSpec.parameters != null) {
 			if (this.parameters == null) this.parameters = new HashMap<>();
-			for (Entry<String, ParameterSpec> paramEntry : resource.resourceSpec.parameters.entrySet()) {
+			for (Entry<String, ParameterSpec> paramEntry : resourceActionSpec.resourceSpec.parameters.entrySet()) {
 				ParameterSpec param = paramEntry.getValue();
 				List<Object> values = this.parameters.get(param.name);
 				if (param.required && param.defaultValue == null && (values == null || values.isEmpty())) details.add(new Detail(param, Failure.MISSING, null));
@@ -87,14 +103,16 @@ public class RequestSpec {
 			}
 		}
 		if (!details.isEmpty()) {
-			throw new ValidationException(String.format("The validation for request \"%s\" failed with %d messages", resource.toString(), details.size()), details);
+			LOG.debug("Validation failed: {}.", details);
+			throw new ValidationException(String.format("The validation for request \"%s\" failed with %d messages", resourceActionSpec.toString(), details.size()), details);
 		}
+		LOG.debug("Validation complete.");
 		return this;
 	}
 
-	public RequestSpec send() throws ValidationException, ClientSpecException, ClientError, ServerError {
+	public RequestSpec send() throws ValidationException, ClientError, ServerError, IOException {
 		validate();
-		response = resource.resourceSpec.client.engine.send(this);
+		response = resourceActionSpec.resourceSpec.client.engine.send(this);
 		sent = true;
 		ResponseException.checkResponseStatus(this);
 		return this;
@@ -106,12 +124,16 @@ public class RequestSpec {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T getDeserializedResponseBody(Class<T> returnType) throws IOException {
-		Deserializer<?> deserializer = resource.resourceSpec.client.getDeserializer(returnType);
+	public <T> T getEntity(Class<T> returnType) throws IOException {
+		String contentType = response.getHeader(Header.CONTENT_TYPE, 0);
+		Deserializer deserializer = resourceActionSpec.resourceSpec.client.getDeserializer(returnType);
+		if (deserializer == null && contentType != null) {
+			deserializer = resourceActionSpec.resourceSpec.client.getDeserializer(contentType);
+		}
 		if (deserializer == null) throw new IllegalArgumentException(String.format("No response body deserializer found for class %s", returnType.getName()));
-		if (this.deserializedResponseBody == null && deserializer.getContentType().equalsIgnoreCase(response.getHeader(Header.CONTENT_TYPE).get(0))) {
+		if (this.deserializedResponseBody == null && deserializer.getContentType().equalsIgnoreCase(response.getHeader(Header.CONTENT_TYPE, 0))) {
 			try (Response response = getResponse()) {
-				this.deserializedResponseBody = deserializer.deserialize(response.getBody());
+				this.deserializedResponseBody = deserializer.deserialize(response.getBody(), returnType, this.resourceActionSpec.resourceSpec.client.charset);
 			}
 		}
 		return (T) this.deserializedResponseBody;

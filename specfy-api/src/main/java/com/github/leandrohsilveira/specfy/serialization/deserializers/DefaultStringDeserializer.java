@@ -8,13 +8,7 @@ import org.apache.commons.io.IOUtils;
 
 import com.github.leandrohsilveira.specfy.Deserializer;
 
-public class DefaultStringDeserializer implements Deserializer<String> {
-
-	private Charset charset;
-
-	public DefaultStringDeserializer(Charset charset) {
-		this.charset = charset;
-	}
+public class DefaultStringDeserializer implements Deserializer {
 
 	@Override
 	public Class<String> getSerializableClass() {
@@ -27,8 +21,9 @@ public class DefaultStringDeserializer implements Deserializer<String> {
 	}
 
 	@Override
-	public String deserialize(InputStream responseInput) throws IOException {
-		return IOUtils.toString(responseInput, this.charset);
+	@SuppressWarnings("unchecked")
+	public <T> T deserialize(InputStream responseInput, Class<T> returnType, Charset charset) throws IOException {
+		return (T) IOUtils.toString(responseInput, charset);
 	}
 
 }

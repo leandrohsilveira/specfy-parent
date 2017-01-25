@@ -36,13 +36,14 @@ public class Spec {
 				this.host = host;
 			}
 
-			public SpecHost port(int port) {
-				this.port = port;
+			public SpecHost port(Integer port) {
+				if (port != null) this.port = port;
 				return this;
 			}
 
+			@Deprecated
 			public RESTfulClientSpec api(String resourcesRoot) {
-				return new RESTfulClientSpec(this, resourcesRoot);
+				return new RESTfulClientSpec(SpecHost.this.compose(), resourcesRoot);
 			}
 
 			@Override

@@ -10,12 +10,6 @@ import com.github.leandrohsilveira.specfy.Serializer;
 
 public class DefaultStringSerializer implements Serializer {
 
-	private Charset charset;
-
-	public DefaultStringSerializer(Charset charset) {
-		this.charset = charset;
-	}
-
 	@Override
 	public Class<?> getSerializableClass() {
 		return String.class;
@@ -27,8 +21,8 @@ public class DefaultStringSerializer implements Serializer {
 	}
 
 	@Override
-	public void serialize(Object obj, OutputStream requestBody) throws IOException {
-		IOUtils.write(((String) obj), requestBody, this.charset);
+	public void serialize(Object obj, OutputStream requestBody, Charset charset) throws IOException {
+		IOUtils.write(((String) obj), requestBody, charset);
 	}
 
 }

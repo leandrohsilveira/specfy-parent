@@ -3,6 +3,8 @@ package com.github.leandrohsilveira.specfy;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import com.github.leandrohsilveira.specfy.utils.SpecfyUtils;
+
 public class ResourceActionSpec {
 
 	public ResourceActionSpec(ResourceSpec resourceSpec, RequestMethod method) {
@@ -17,7 +19,7 @@ public class ResourceActionSpec {
 
 	@Override
 	public String toString() {
-		return String.format("%s %s", method != null ? method : "ABSTRACT", resourceSpec.compose());
+		return String.format("%s /%s", method != null ? method : "ABSTRACT", resourceSpec.compose());
 	}
 
 	public ResourceSpec subResource() {
@@ -27,14 +29,18 @@ public class ResourceActionSpec {
 	}
 
 	public ResourceSpec subResource(String resource) {
-		ResourceSpec subResourceSpec = new ResourceSpec(resourceSpec.client, RESTfulClientSpec.safeConcat(this.resourceSpec.resource, resource));
+		ResourceSpec subResourceSpec = new ResourceSpec(resourceSpec.client, SpecfyUtils.safeConcat(this.resourceSpec.resource, resource));
 		copyParameters(resourceSpec, subResourceSpec);
 		return subResourceSpec;
 	}
 
-	public RequestSpec newRequest() {
+	public RequestSpec newLocalRequest() {
+		return newRequest(resourceSpec.client.host);
+	}
+
+	public RequestSpec newRequest(String host) {
 		if (this._abstract) throw new IllegalStateException(String.format("The resource %s is abstract and can't send requests.", toString()));
-		return new RequestSpec(this);
+		return new RequestSpec(this, host);
 	}
 
 	private void copyParameters(ResourceSpec from, ResourceSpec to) {

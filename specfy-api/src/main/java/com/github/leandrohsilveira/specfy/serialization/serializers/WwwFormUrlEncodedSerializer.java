@@ -12,12 +12,6 @@ import com.github.leandrohsilveira.specfy.serialization.WwwFormUrlEncoded;
 
 public class WwwFormUrlEncodedSerializer implements Serializer {
 
-	public WwwFormUrlEncodedSerializer(Charset charset) {
-		this.charset = charset;
-	}
-
-	private Charset charset;
-
 	@Override
 	public Class<?> getSerializableClass() {
 		return WwwFormUrlEncoded.class;
@@ -29,7 +23,7 @@ public class WwwFormUrlEncodedSerializer implements Serializer {
 	}
 
 	@Override
-	public void serialize(Object obj, OutputStream requestBody) throws IOException {
+	public void serialize(Object obj, OutputStream requestBody, Charset charset) throws IOException {
 		String value = ((WwwFormUrlEncoded) obj).toString();
 		IOUtils.write(URLEncoder.encode(value, charset.name()), requestBody, charset);
 	}

@@ -1,4 +1,4 @@
-package com.github.leandrohsilveira.specfy.serializers;
+package com.github.leandrohsilveira.specfy.serialization.serializers;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,15 +11,11 @@ import com.github.leandrohsilveira.specfy.Serializer;
 
 public class JSONArraySerializer extends AbstracJsonSerializer implements Serializer {
 
-	public JSONArraySerializer(Charset charset) {
-		super(charset);
-	}
-
 	public Class<?> getSerializableClass() {
 		return JSONArray.class;
 	}
 
-	public void serialize(Object obj, OutputStream requestBody) throws IOException {
+	public void serialize(Object obj, OutputStream requestBody, Charset charset) throws IOException {
 		((JSONArray) obj).writeJSONString(new OutputStreamWriter(requestBody, charset));
 	}
 

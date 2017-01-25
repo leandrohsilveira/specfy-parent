@@ -36,6 +36,15 @@ public class NetURLConnectionResponse implements Response {
 	}
 
 	@Override
+	public String getHeader(Header header, int index) {
+		List<String> headerValues = getHeader(header);
+		if (headerValues != null && headerValues.size() > index) {
+			return headerValues.get(index);
+		}
+		return null;
+	}
+
+	@Override
 	public int getStatus() {
 		return status;
 	}

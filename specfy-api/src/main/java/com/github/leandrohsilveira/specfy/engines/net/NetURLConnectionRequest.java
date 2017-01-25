@@ -2,7 +2,6 @@ package com.github.leandrohsilveira.specfy.engines.net;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -14,7 +13,6 @@ import com.github.leandrohsilveira.specfy.Request;
 import com.github.leandrohsilveira.specfy.RequestMethod;
 import com.github.leandrohsilveira.specfy.Response;
 import com.github.leandrohsilveira.specfy.Serializer;
-import com.github.leandrohsilveira.specfy.exceptions.ClientSpecException;
 
 public class NetURLConnectionRequest implements Request {
 
@@ -39,12 +37,8 @@ public class NetURLConnectionRequest implements Request {
 	}
 
 	@Override
-	public void setMethod(RequestMethod method) throws ClientSpecException {
-		try {
-			this.connection.setRequestMethod(method.name());
-		} catch (ProtocolException e) {
-			throw new ClientSpecException(e.getMessage(), e);
-		}
+	public void setMethod(RequestMethod method) throws IOException {
+		this.connection.setRequestMethod(method.name());
 	}
 
 	@Override
@@ -55,7 +49,7 @@ public class NetURLConnectionRequest implements Request {
 	@Override
 	public void writeBody(Serializer serializer, Object content) throws IOException {
 		this.connection.setDoOutput(true);
-		serializer.serialize(content, this.connection.getOutputStream());
+		serializer.serialize(content, this.connection.getOutputStream(), charset);
 	}
 
 	@Override

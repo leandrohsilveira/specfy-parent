@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 import org.junit.Test;
 
 import com.github.leandrohsilveira.specfy.exceptions.ValidationException;
-import com.github.leandrohsilveira.specfy.sets.JsonSimpleSerializationSet;
+import com.github.leandrohsilveira.specfy.serialization.sets.JsonSimpleSerializationSet;
 
 public class JsonSimpleSerializationTest {
 
@@ -14,21 +14,22 @@ public class JsonSimpleSerializationTest {
 	 * deserialization of the {@link JSONObject} and {@link JSONArray} objects.
 	 */
 	private static RESTfulClientSpec root = Spec.http().host("localhost").port(8080).api("api").register(new JsonSimpleSerializationSet());
+	private static final String CONTENT_TYPE = "application/json";
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void jsonSimpleBodyTest() throws Exception {
-		ResourceActionSpec createUser = root.resource("users").isPOST(JSONObject.class);
+		ResourceActionSpec createUser = root.resource("users").isPOST(CONTENT_TYPE);
 		JSONObject user = new JSONObject();
 		user.put("username", "test");
 		user.put("password", "test123");
-		createUser.newRequest().body(user).validate();
+		createUser.newLocalRequest().body(user).validate();
 	}
 
 	@Test(expected = ValidationException.class)
 	@SuppressWarnings("unchecked")
 	public void jsonSimpleRequiredBodyNotBoundTest() throws Exception {
-		ResourceActionSpec createUser = root.resource("users").isPOST(JSONObject.class);
-		createUser.newRequest().validate();
+		ResourceActionSpec createUser = root.resource("users").isPOST(CONTENT_TYPE);
+		createUser.newLocalRequest().validate();
 	}
 }

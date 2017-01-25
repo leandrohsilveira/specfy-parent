@@ -3,53 +3,56 @@ package com.github.leandrohsilveira.specfy;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
 
-import com.github.leandrohsilveira.specfy.Spec.SpecSchema.SpecHost;
 import com.github.leandrohsilveira.specfy.engines.net.NetURLConnectionEngine;
-import com.github.leandrohsilveira.specfy.serialization.serializers.DefaultStringSerializationSet;
 import com.github.leandrohsilveira.specfy.serialization.serializers.WwwFormUrlEncodedSerializer;
+import com.github.leandrohsilveira.specfy.serialization.set.DefaultStringSerializationSet;
+import com.github.leandrohsilveira.specfy.utils.SpecfyUtils;
 
 public class RESTfulClientSpec {
 
+	public RESTfulClientSpec(String resourcesRoot) {
+		this(null, resourcesRoot);
+	}
+
+	@Deprecated
+	protected RESTfulClientSpec(String host, String resourcesRoot) {
+		this.host = host;
+		this.resourcesRoot = SpecfyUtils.removeFirstDash(SpecfyUtils.removeLastDash(resourcesRoot));
+		registerDefaultSerializers();
+	}
+
 	protected String resourcesRoot;
 	protected Map<Class<?>, Serializer> serializers;
-	protected Map<Class<?>, Deserializer<?>> deserializers;
+	protected Map<Class<?>, Deserializer> deserializers;
+	protected Map<String, Serializer> defaultContentSerializers;
+	protected Map<String, Deserializer> defaultContentDeserializers;
 	protected Engine engine = new NetURLConnectionEngine();
 	protected SSLContext defaultSslContext;
 
 	protected Charset charset = Charset.forName("UTF-8");
 
+	protected String host = "http://localhost:8080";
+
 	@Override
 	public String toString() {
-		return String.format("RESTful Client Root: %s", resourcesRoot);
+		return String.format("RESTful Client Root: /%s", resourcesRoot);
 	}
 
-	protected RESTfulClientSpec(SpecHost resourceHost, String resourcesRoot) {
-		this.resourcesRoot = safeConcat(resourceHost.compose(), resourcesRoot);
+	private void registerDefaultSerializers() {
+		WwwFormUrlEncodedSerializer serializer = new WwwFormUrlEncodedSerializer();
+		register(serializer);
+		registerDefault(serializer);
 		register(new DefaultStringSerializationSet());
-		register(new WwwFormUrlEncodedSerializer(this.charset));
-	}
-
-	protected static String safeConcat(String baseString, String concat) {
-		String base = baseString;
-		if (!endsWithDash(baseString)) {
-			base = baseString.concat("/");
-		}
-		return base.concat(concat);
-	}
-
-	protected static boolean endsWithDash(String resourcesRoot) {
-		return Pattern.matches(".+\\/$", resourcesRoot);
 	}
 
 	public Serializer getSerializer(Class<?> clazz) {
 		return serializers != null ? serializers.get(clazz) : null;
 	}
 
-	public Deserializer<?> getDeserializer(Class<?> clazz) {
+	public Deserializer getDeserializer(Class<?> clazz) {
 		return deserializers != null ? deserializers.get(clazz) : null;
 	}
 
@@ -59,14 +62,26 @@ public class RESTfulClientSpec {
 		return this;
 	}
 
-	public RESTfulClientSpec register(Deserializer<?> deserializer) {
+	public RESTfulClientSpec register(Deserializer deserializer) {
 		if (this.deserializers == null) this.deserializers = new HashMap<>();
 		this.deserializers.put(deserializer.getSerializableClass(), deserializer);
 		return this;
 	}
 
-	public RESTfulClientSpec register(SerializationSet set) {
-		set.register(this);
+	public RESTfulClientSpec registerDefault(Serializer serializer) {
+		if (this.defaultContentSerializers == null) this.defaultContentSerializers = new HashMap<>();
+		this.defaultContentSerializers.put(serializer.getContentType(), serializer);
+		return this;
+	}
+
+	public RESTfulClientSpec registerDefault(Deserializer deserializer) {
+		if (this.defaultContentDeserializers == null) this.defaultContentDeserializers = new HashMap<>();
+		this.defaultContentDeserializers.put(deserializer.getContentType(), deserializer);
+		return this;
+	}
+
+	public RESTfulClientSpec register(SerializationSet serializationSet) {
+		serializationSet.register(this);
 		return this;
 	}
 
@@ -95,6 +110,14 @@ public class RESTfulClientSpec {
 	public RESTfulClientSpec setDefaultSslContext(SSLContext defaultSslContext) {
 		this.defaultSslContext = defaultSslContext;
 		return this;
+	}
+
+	public Deserializer getDeserializer(String contentType) {
+		return defaultContentDeserializers != null ? defaultContentDeserializers.get(contentType) : null;
+	}
+
+	public Serializer getSerializer(String contentType) {
+		return defaultContentSerializers != null ? defaultContentSerializers.get(contentType) : null;
 	}
 
 }

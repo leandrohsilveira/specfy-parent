@@ -7,15 +7,13 @@ import java.util.List;
 
 import javax.net.ssl.SSLContext;
 
-import com.github.leandrohsilveira.specfy.exceptions.ClientSpecException;
-
 public interface Request extends Closeable {
 
 	Charset getCharset();
 
 	void setSslContext(SSLContext sslContext);
 
-	void setMethod(RequestMethod method) throws ClientSpecException;
+	void setMethod(RequestMethod method) throws IOException;
 
 	void setContentType(String contentType);
 

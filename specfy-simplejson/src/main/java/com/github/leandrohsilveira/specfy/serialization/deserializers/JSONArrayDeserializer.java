@@ -1,4 +1,4 @@
-package com.github.leandrohsilveira.specfy.deserializers;
+package com.github.leandrohsilveira.specfy.serialization.deserializers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,19 +10,18 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class JSONArrayDeserializer extends AbstracJsonDeserializer<JSONArray> {
+public class JSONArrayDeserializer extends AbstracJsonDeserializer {
 
-	public JSONArrayDeserializer(Charset charset) {
-		super(charset);
-	}
-
+	@Override
 	public Class<JSONArray> getSerializableClass() {
 		return JSONArray.class;
 	}
 
-	public JSONArray deserialize(InputStream responseInput) throws IOException {
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T deserialize(InputStream responseInput, Class<T> returnType, Charset charset) throws IOException {
 		try {
-			return (JSONArray) new JSONParser().parse(new InputStreamReader(responseInput, charset));
+			return (T) new JSONParser().parse(new InputStreamReader(responseInput, charset));
 		} catch (ParseException e) {
 			throw new IOException(e.getMessage(), e);
 		} finally {

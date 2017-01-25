@@ -5,13 +5,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.github.leandrohsilveira.specfy.Spec.Composer;
+import com.github.leandrohsilveira.specfy.utils.SpecfyUtils;
 
 public class ResourceSpec extends Composer {
 
 	protected RESTfulClientSpec client;
 	protected String resource;
 	protected Map<String, ParameterSpec> parameters;
-	protected Serializer bodySerializer;
+	protected String contentType;
 
 	protected ResourceSpec(RESTfulClientSpec client, String resource) {
 		this.client = client;
@@ -34,18 +35,18 @@ public class ResourceSpec extends Composer {
 		return new ResourceActionSpec(this, RequestMethod.OPTIONS);
 	}
 
-	public ResourceActionSpec isPOST(Class<?> contentType) {
-		contentType(contentType);
+	public ResourceActionSpec isPOST(String contentType) {
+		this.contentType = contentType;
 		return new ResourceActionSpec(this, RequestMethod.POST);
 	}
 
-	public ResourceActionSpec isPUT(Class<?> contentType) {
-		contentType(contentType);
+	public ResourceActionSpec isPUT(String contentType) {
+		this.contentType = contentType;
 		return new ResourceActionSpec(this, RequestMethod.PUT);
 	}
 
-	public ResourceActionSpec isPATCH(Class<?> contentType) {
-		contentType(contentType);
+	public ResourceActionSpec isPATCH(String contentType) {
+		this.contentType = contentType;
 		return new ResourceActionSpec(this, RequestMethod.PATCH);
 	}
 
@@ -53,10 +54,10 @@ public class ResourceSpec extends Composer {
 		return new ResourceActionSpec(this, RequestMethod.DELETE);
 	}
 
-	private void contentType(Class<?> contentType) {
-		Serializer serializer = client.getSerializer(contentType);
-		if (serializer == null) throw new IllegalArgumentException(String.format("No serializer found for class %s", contentType.getName()));
-		this.bodySerializer = serializer;
+	public Serializer getSerializer() {
+		if (contentType != null)
+			return client.getSerializer(contentType);
+		return null;
 	}
 
 	private ResourceSpec attribute(ParameterSpec parameterSpec) {
@@ -69,7 +70,7 @@ public class ResourceSpec extends Composer {
 
 	public ResourceSpec pathParameter(String parameterName, String regex) {
 		attribute(new ParameterSpec(ParameterType.PATH, parameterName, regex, true));
-		this.resource = RESTfulClientSpec.safeConcat(this.resource, String.format("{%s}", parameterName));
+		this.resource = SpecfyUtils.safeConcat(this.resource, String.format("{%s}", parameterName));
 		return this;
 	}
 
@@ -138,7 +139,11 @@ public class ResourceSpec extends Composer {
 
 	@Override
 	protected String compose() {
-		return RESTfulClientSpec.safeConcat(client.resourcesRoot, resource);
+		return SpecfyUtils.safeConcat(client.resourcesRoot, resource);
+	}
+
+	public boolean isBodyRequired() {
+		return contentType != null;
 	}
 
 }

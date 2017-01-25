@@ -1,10 +1,9 @@
 package com.github.leandrohsilveira.specfy;
 
-import com.github.leandrohsilveira.specfy.exceptions.ClientSpecException;
-import com.github.leandrohsilveira.specfy.exceptions.ValidationException;
+import java.io.IOException;
 
 public interface Engine {
 
-	public Response send(RequestSpec request) throws ValidationException, ClientSpecException;
+	public Response send(RequestSpec request) throws IOException;
 
 }
