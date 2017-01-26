@@ -16,7 +16,7 @@ import com.github.leandrohsilveira.specfy.utils.SpecfyUtils;
 public class RESTfulClientSpec {
 
 	public RESTfulClientSpec(String resourcesRoot) {
-		this(null, resourcesRoot);
+		this("http://localhost:8080", resourcesRoot);
 	}
 
 	@Deprecated
@@ -37,7 +37,7 @@ public class RESTfulClientSpec {
 
 	protected Charset charset = Charset.forName("UTF-8");
 
-	protected String host = "http://localhost:8080";
+	protected String host;
 
 	@Override
 	public String toString() {
