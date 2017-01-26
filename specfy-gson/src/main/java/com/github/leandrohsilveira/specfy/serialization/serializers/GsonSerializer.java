@@ -14,6 +14,7 @@ public class GsonSerializer implements Serializer {
 	public void serialize(Object obj, OutputStream requestBody, Charset charset) throws IOException {
 		try (OutputStreamWriter writer = new OutputStreamWriter(requestBody, charset)) {
 			GsonSerializationUtils.GSON.toJson(obj, writer);
+			requestBody.flush();
 		}
 	}
 }
