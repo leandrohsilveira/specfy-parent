@@ -1,6 +1,6 @@
 package com.github.leandrohsilveira.specfy.exceptions;
 
-import com.github.leandrohsilveira.specfy.Response;
+import com.github.leandrohsilveira.specfy.Request;
 import com.github.leandrohsilveira.specfy.exceptions.http.ClientError;
 import com.github.leandrohsilveira.specfy.exceptions.http.ServerError;
 import com.github.leandrohsilveira.specfy.exceptions.http.client.BadRequest;
@@ -32,70 +32,70 @@ public abstract class ResponseException extends Exception {
 
 	private static final long serialVersionUID = -4737642975124215055L;
 
-	public ResponseException(Response response) {
-		super(response.getStatusText());
-		this.response = response;
+	public ResponseException(Request request) {
+		super(request.getResponse().getStatusText());
+		this.request = request;
 	}
 
-	private Response response;
+	private Request request;
 
-	public Response getResponse() {
-		return response;
+	public Request getRequest() {
+		return request;
 	}
 
-	public static void checkResponseStatus(Response response) throws ClientError, ServerError {
-		int status = response.getStatus();
+	public static void checkResponseStatus(Request request) throws ClientError, ServerError {
+		int status = request.getResponse().getStatus();
 		if (status >= 400) {
 			switch (status) {
 				case 400:
-					throw new BadRequest(response);
+					throw new BadRequest(request);
 				case 401:
-					throw new Unauthorized(response);
+					throw new Unauthorized(request);
 				case 402:
-					throw new PaymentRequired(response);
+					throw new PaymentRequired(request);
 				case 403:
-					throw new Forbidden(response);
+					throw new Forbidden(request);
 				case 404:
-					throw new NotFound(response);
+					throw new NotFound(request);
 				case 405:
-					throw new MethodNotAllowed(response);
+					throw new MethodNotAllowed(request);
 				case 406:
-					throw new NotAcceptable(response);
+					throw new NotAcceptable(request);
 				case 407:
-					throw new ProxyAuthenticationRequired(response);
+					throw new ProxyAuthenticationRequired(request);
 				case 408:
-					throw new RequestTimeout(response);
+					throw new RequestTimeout(request);
 				case 409:
-					throw new Conflict(response);
+					throw new Conflict(request);
 				case 410:
-					throw new Gone(response);
+					throw new Gone(request);
 				case 411:
-					throw new LengthRequired(response);
+					throw new LengthRequired(request);
 				case 412:
-					throw new PreconditionFailed(response);
+					throw new PreconditionFailed(request);
 				case 413:
-					throw new RequestEntityTooLarge(response);
+					throw new RequestEntityTooLarge(request);
 				case 414:
-					throw new RequestURITooLong(response);
+					throw new RequestURITooLong(request);
 				case 415:
-					throw new UnsupportedMediaType(response);
+					throw new UnsupportedMediaType(request);
 				case 416:
-					throw new RequestedRangeNotSatisfiable(response);
+					throw new RequestedRangeNotSatisfiable(request);
 				case 417:
-					throw new ExpectationFailed(response);
+					throw new ExpectationFailed(request);
 
 				case 500:
-					throw new InternalServerError(response);
+					throw new InternalServerError(request);
 				case 501:
-					throw new NotImplemented(response);
+					throw new NotImplemented(request);
 				case 502:
-					throw new BadGateway(response);
+					throw new BadGateway(request);
 				case 503:
-					throw new ServiceUnavailable(response);
+					throw new ServiceUnavailable(request);
 				case 504:
-					throw new GatewayTimeout(response);
+					throw new GatewayTimeout(request);
 				case 505:
-					throw new HTTPVersionNotSupported(response);
+					throw new HTTPVersionNotSupported(request);
 
 				default:
 					throw new UnknownError("Unknown HTTP Error Status " + status);

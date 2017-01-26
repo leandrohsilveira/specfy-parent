@@ -20,6 +20,7 @@ public abstract class AbstractRequest implements Request {
 	private RequestSpec requestSpec;
 	private Response response;
 	private Charset charset;
+	private boolean sent;
 
 	public abstract void setSslContext(SSLContext sslContext);
 
@@ -55,15 +56,20 @@ public abstract class AbstractRequest implements Request {
 	}
 
 	@Override
-	public <T> T getResponseEntity(Class<T> clazz) throws ClientError, ServerError, IOException {
+	public <T> T getResponseEntity(Class<T> clazz) throws IOException {
 		Deserializer deserializer = requestSpec.resourceActionSpec.resourceSpec.client.getDeserializer(clazz);
 		if (deserializer == null) throw new IllegalArgumentException("No deserializer found for object of class " + clazz.getName());
 		return deserializer.deserialize(getResponse().getBody(), clazz, charset);
 	}
 
 	@Override
-	public Response getResponse() throws ClientError, ServerError {
-		if (response == null) send();
+	public boolean isSent() {
+		return sent;
+	}
+
+	@Override
+	public Response getResponse() {
+		if (!isSent()) throw new IllegalStateException("The request wasn't sent yet. Send the request before trying to get the response.");
 		return response;
 	}
 
@@ -71,7 +77,8 @@ public abstract class AbstractRequest implements Request {
 	public Request send() throws ClientError, ServerError {
 		if (response != null) throw new IllegalStateException("The request already been sent and can't be sent again.");
 		response = createResponse();
-		ResponseException.checkResponseStatus(response);
+		sent = true;
+		ResponseException.checkResponseStatus(this);
 		return this;
 	}
 }

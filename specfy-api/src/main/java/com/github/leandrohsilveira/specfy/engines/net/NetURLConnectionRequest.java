@@ -61,6 +61,10 @@ public class NetURLConnectionRequest extends AbstractRequest {
 		}
 	}
 
+	public HttpURLConnection getConnection() {
+		return connection;
+	}
+
 	@Override
 	public Response createResponse() {
 		return new NetURLConnectionResponse(this.connection);

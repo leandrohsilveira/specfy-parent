@@ -16,12 +16,14 @@ public interface Request extends Closeable {
 
 	Request send() throws ClientError, ServerError;
 
-	Response getResponse() throws ClientError, ServerError;
+	Response getResponse();
 
 	RequestSpec getRequestSpec();
 
-	<T> T getResponseEntity(Class<T> clazz) throws ClientError, ServerError, IOException;
+	<T> T getResponseEntity(Class<T> clazz) throws IOException;
 
 	Request serialize(Object object) throws IOException;
+
+	boolean isSent();
 
 }
