@@ -6,19 +6,11 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import com.github.leandrohsilveira.specfy.exceptions.ValidationException;
-import com.github.leandrohsilveira.specfy.serialization.WwwFormUrlEncoded;
 
 public class ResourceSpecTest {
 
 	private static final String NUMBER_REGEX = "^\\d+$";
 	private RESTfulClientSpec root = new RESTfulClientSpec("/api");
-
-	@Test
-	public void teste() {
-		String entry = "/replace/last/";
-		String replaced = entry.replaceAll("\\/$", "");
-		assertEquals("/replace/last", replaced);
-	}
 
 	@Test
 	public void simpleResourceTest() {
@@ -144,12 +136,6 @@ public class ResourceSpecTest {
 
 		getUser.newLocalRequest().validate();
 
-	}
-
-	@Test
-	public void requestBodyTest() throws Exception {
-		ResourceActionSpec createUser = root.resource("users").isPOST();
-		createUser.newLocalRequest().build().serialize(new WwwFormUrlEncoded().bind("username", "test").bind("password", "test123"));
 	}
 
 }
