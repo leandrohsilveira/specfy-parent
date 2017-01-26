@@ -13,16 +13,6 @@ import com.github.leandrohsilveira.specfy.serialization.WwwFormUrlEncoded;
 public class WwwFormUrlEncodedSerializer implements Serializer {
 
 	@Override
-	public Class<?> getSerializableClass() {
-		return WwwFormUrlEncoded.class;
-	}
-
-	@Override
-	public String getContentType() {
-		return "application/x-www-form-urlencoded";
-	}
-
-	@Override
 	public void serialize(Object obj, OutputStream requestBody, Charset charset) throws IOException {
 		String value = ((WwwFormUrlEncoded) obj).toString();
 		IOUtils.write(URLEncoder.encode(value, charset.name()), requestBody, charset);

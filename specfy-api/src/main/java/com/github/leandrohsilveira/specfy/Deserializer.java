@@ -6,10 +6,6 @@ import java.nio.charset.Charset;
 
 public interface Deserializer {
 
-	Class<?> getSerializableClass();
-
-	String getContentType();
-
 	<T> T deserialize(InputStream responseInput, Class<T> returnType, Charset charset) throws IOException;
 
 }

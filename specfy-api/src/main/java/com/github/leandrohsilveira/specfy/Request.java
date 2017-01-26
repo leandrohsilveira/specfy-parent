@@ -2,27 +2,26 @@ package com.github.leandrohsilveira.specfy;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.List;
 
-import javax.net.ssl.SSLContext;
+import com.github.leandrohsilveira.specfy.exceptions.http.ClientError;
+import com.github.leandrohsilveira.specfy.exceptions.http.ServerError;
 
 public interface Request extends Closeable {
 
 	Charset getCharset();
 
-	void setSslContext(SSLContext sslContext);
+	OutputStream getBody() throws IOException;
 
-	void setMethod(RequestMethod method) throws IOException;
+	Request send() throws ClientError, ServerError;
 
-	void setContentType(String contentType);
+	Response getResponse() throws ClientError, ServerError;
 
-	void writeBody(Serializer serializer, Object content) throws IOException;
+	RequestSpec getRequestSpec();
 
-	void addHeaderValues(String headerName, List<Object> headerValues);
+	<T> T getResponseEntity(Class<T> clazz) throws ClientError, ServerError, IOException;
 
-	void addCookieValues(String key, List<Object> value);
-
-	Response getResponse();
+	Request serialize(Object object) throws IOException;
 
 }

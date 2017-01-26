@@ -6,16 +6,12 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
-import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class JSONObjectDeserializer extends AbstracJsonDeserializer {
+import com.github.leandrohsilveira.specfy.Deserializer;
 
-	@Override
-	public Class<JSONObject> getSerializableClass() {
-		return JSONObject.class;
-	}
+public class JSONObjectDeserializer implements Deserializer {
 
 	@Override
 	@SuppressWarnings("unchecked")

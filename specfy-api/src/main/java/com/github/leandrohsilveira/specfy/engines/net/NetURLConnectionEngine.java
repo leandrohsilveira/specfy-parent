@@ -5,13 +5,13 @@ import java.nio.charset.Charset;
 
 import com.github.leandrohsilveira.specfy.AbstractEngine;
 import com.github.leandrohsilveira.specfy.Engine;
-import com.github.leandrohsilveira.specfy.Request;
+import com.github.leandrohsilveira.specfy.RequestSpec;
 
-public class NetURLConnectionEngine extends AbstractEngine implements Engine {
+public class NetURLConnectionEngine extends AbstractEngine<NetURLConnectionRequest> implements Engine {
 
 	@Override
-	public Request createRequest(String url, Charset charset) throws IOException {
-		return new NetURLConnectionRequest(url, charset);
+	protected NetURLConnectionRequest createRequest(RequestSpec requestSpec, String url, Charset charset) throws IOException {
+		return new NetURLConnectionRequest(requestSpec, url, charset);
 	}
 
 }

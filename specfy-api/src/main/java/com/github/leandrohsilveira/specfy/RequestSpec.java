@@ -14,12 +14,9 @@ import javax.net.ssl.SSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.leandrohsilveira.specfy.exceptions.ResponseException;
 import com.github.leandrohsilveira.specfy.exceptions.ValidationException;
 import com.github.leandrohsilveira.specfy.exceptions.ValidationException.Detail;
 import com.github.leandrohsilveira.specfy.exceptions.ValidationException.Detail.Failure;
-import com.github.leandrohsilveira.specfy.exceptions.http.ClientError;
-import com.github.leandrohsilveira.specfy.exceptions.http.ServerError;
 
 public class RequestSpec {
 
@@ -37,17 +34,7 @@ public class RequestSpec {
 
 	protected Map<String, List<Object>> parameters;
 
-	protected Object content;
-
 	protected SSLContext sslContext;
-
-	protected boolean sent = false;
-
-	private Response response;
-
-	private Object deserializedResponseBody;
-
-	protected Serializer serializer;
 
 	public RequestSpec useSsl(SSLContext sslContext) {
 		this.sslContext = sslContext;
@@ -70,22 +57,9 @@ public class RequestSpec {
 		return this;
 	}
 
-	public RequestSpec body(Object content) {
-		LOG.debug("Setting body content {}");
-		if (content != null) {
-			serializer = this.resourceActionSpec.resourceSpec.client.getSerializer(content.getClass());
-			if (serializer == null) serializer = this.resourceActionSpec.resourceSpec.getSerializer();
-			if (serializer == null) throw new IllegalArgumentException(String.format("No suitable serializer found for class %s or content-type %s", content.getClass().getName(), resourceActionSpec.resourceSpec.contentType));
-			this.content = content;
-		}
-		return this;
-	}
-
 	public RequestSpec validate() throws ValidationException {
-		if (this.sent) throw new IllegalStateException("This request has already completed and can't be sent again.");
 		LOG.debug("Stating Request validation");
 		List<Detail> details = new ArrayList<>();
-		if (this.resourceActionSpec.resourceSpec.isBodyRequired() && this.content == null) details.add(new Detail(null, Failure.MISSING_BODY, null));
 		if (resourceActionSpec.resourceSpec.parameters != null) {
 			if (this.parameters == null) this.parameters = new HashMap<>();
 			for (Entry<String, ParameterSpec> paramEntry : resourceActionSpec.resourceSpec.parameters.entrySet()) {
@@ -110,33 +84,9 @@ public class RequestSpec {
 		return this;
 	}
 
-	public RequestSpec send() throws ValidationException, ClientError, ServerError, IOException {
+	public Request build() throws IOException, ValidationException {
 		validate();
-		response = resourceActionSpec.resourceSpec.client.engine.send(this);
-		sent = true;
-		ResponseException.checkResponseStatus(this);
-		return this;
-	}
-
-	public Response getResponse() {
-		if (!this.sent) throw new IllegalStateException("The request was not sent yet.");
-		return response;
-	}
-
-	@SuppressWarnings("unchecked")
-	public <T> T getEntity(Class<T> returnType) throws IOException {
-		String contentType = response.getHeader(Header.CONTENT_TYPE, 0);
-		Deserializer deserializer = resourceActionSpec.resourceSpec.client.getDeserializer(returnType);
-		if (deserializer == null && contentType != null) {
-			deserializer = resourceActionSpec.resourceSpec.client.getDeserializer(contentType);
-		}
-		if (deserializer == null) throw new IllegalArgumentException(String.format("No response body deserializer found for class %s", returnType.getName()));
-		if (this.deserializedResponseBody == null && deserializer.getContentType().equalsIgnoreCase(response.getHeader(Header.CONTENT_TYPE, 0))) {
-			try (Response response = getResponse()) {
-				this.deserializedResponseBody = deserializer.deserialize(response.getBody(), returnType, this.resourceActionSpec.resourceSpec.client.charset);
-			}
-		}
-		return (T) this.deserializedResponseBody;
+		return resourceActionSpec.resourceSpec.client.engine.prepareRequest(this);
 	}
 
 }

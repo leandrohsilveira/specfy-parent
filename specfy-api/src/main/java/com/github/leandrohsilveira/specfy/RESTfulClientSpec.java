@@ -7,8 +7,10 @@ import java.util.Map;
 import javax.net.ssl.SSLContext;
 
 import com.github.leandrohsilveira.specfy.engines.net.NetURLConnectionEngine;
+import com.github.leandrohsilveira.specfy.serialization.WwwFormUrlEncoded;
+import com.github.leandrohsilveira.specfy.serialization.serializers.ObjectSerializer;
 import com.github.leandrohsilveira.specfy.serialization.serializers.WwwFormUrlEncodedSerializer;
-import com.github.leandrohsilveira.specfy.serialization.set.DefaultStringSerializationSet;
+import com.github.leandrohsilveira.specfy.serialization.set.StringSerializationSet;
 import com.github.leandrohsilveira.specfy.utils.SpecfyUtils;
 
 public class RESTfulClientSpec {
@@ -27,8 +29,9 @@ public class RESTfulClientSpec {
 	protected String resourcesRoot;
 	protected Map<Class<?>, Serializer> serializers;
 	protected Map<Class<?>, Deserializer> deserializers;
-	protected Map<String, Serializer> defaultContentSerializers;
-	protected Map<String, Deserializer> defaultContentDeserializers;
+	protected Serializer defaultObjectSerializer;
+	protected Deserializer defaultObjectDeserializer;
+
 	protected Engine engine = new NetURLConnectionEngine();
 	protected SSLContext defaultSslContext;
 
@@ -42,41 +45,30 @@ public class RESTfulClientSpec {
 	}
 
 	private void registerDefaultSerializers() {
-		WwwFormUrlEncodedSerializer serializer = new WwwFormUrlEncodedSerializer();
-		register(serializer);
-		registerDefault(serializer);
-		register(new DefaultStringSerializationSet());
+		register(WwwFormUrlEncoded.class, new WwwFormUrlEncodedSerializer());
+		register(new StringSerializationSet());
+		register(new ObjectSerializer());
 	}
 
-	public Serializer getSerializer(Class<?> clazz) {
-		return serializers != null ? serializers.get(clazz) : null;
+	public RESTfulClientSpec register(Class<?> forClass, Serializer serializer) {
+		if (this.serializers == null) this.serializers = new HashMap<>();
+		this.serializers.put(forClass, serializer);
+		return this;
 	}
 
-	public Deserializer getDeserializer(Class<?> clazz) {
-		return deserializers != null ? deserializers.get(clazz) : null;
+	public RESTfulClientSpec register(Class<?> forClass, Deserializer deserializer) {
+		if (this.deserializers == null) this.deserializers = new HashMap<>();
+		this.deserializers.put(forClass, deserializer);
+		return this;
 	}
 
 	public RESTfulClientSpec register(Serializer serializer) {
-		if (this.serializers == null) this.serializers = new HashMap<>();
-		this.serializers.put(serializer.getSerializableClass(), serializer);
+		this.defaultObjectSerializer = serializer;
 		return this;
 	}
 
 	public RESTfulClientSpec register(Deserializer deserializer) {
-		if (this.deserializers == null) this.deserializers = new HashMap<>();
-		this.deserializers.put(deserializer.getSerializableClass(), deserializer);
-		return this;
-	}
-
-	public RESTfulClientSpec registerDefault(Serializer serializer) {
-		if (this.defaultContentSerializers == null) this.defaultContentSerializers = new HashMap<>();
-		this.defaultContentSerializers.put(serializer.getContentType(), serializer);
-		return this;
-	}
-
-	public RESTfulClientSpec registerDefault(Deserializer deserializer) {
-		if (this.defaultContentDeserializers == null) this.defaultContentDeserializers = new HashMap<>();
-		this.defaultContentDeserializers.put(deserializer.getContentType(), deserializer);
+		this.defaultObjectDeserializer = deserializer;
 		return this;
 	}
 
@@ -112,12 +104,30 @@ public class RESTfulClientSpec {
 		return this;
 	}
 
-	public Deserializer getDeserializer(String contentType) {
-		return defaultContentDeserializers != null ? defaultContentDeserializers.get(contentType) : null;
+	public Serializer getSerializer(Class<?> clazz) {
+		if (serializers != null) {
+			Serializer serializer = serializers.get(clazz);
+			if (serializer != null)
+				return serializer;
+		}
+		return getDefaultObjectSerializer();
 	}
 
-	public Serializer getSerializer(String contentType) {
-		return defaultContentSerializers != null ? defaultContentSerializers.get(contentType) : null;
+	public Deserializer getDeserializer(Class<?> clazz) {
+		if (deserializers != null) {
+			Deserializer deserializer = deserializers.get(clazz);
+			if (deserializer != null)
+				return deserializer;
+		}
+		return getDefaultObjectDeserializer();
+	}
+
+	public Deserializer getDefaultObjectDeserializer() {
+		return defaultObjectDeserializer;
+	}
+
+	public Serializer getDefaultObjectSerializer() {
+		return defaultObjectSerializer;
 	}
 
 }

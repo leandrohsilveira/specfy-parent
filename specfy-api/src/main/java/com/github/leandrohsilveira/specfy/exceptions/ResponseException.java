@@ -1,6 +1,6 @@
 package com.github.leandrohsilveira.specfy.exceptions;
 
-import com.github.leandrohsilveira.specfy.RequestSpec;
+import com.github.leandrohsilveira.specfy.Response;
 import com.github.leandrohsilveira.specfy.exceptions.http.ClientError;
 import com.github.leandrohsilveira.specfy.exceptions.http.ServerError;
 import com.github.leandrohsilveira.specfy.exceptions.http.client.BadRequest;
@@ -31,70 +31,71 @@ import com.github.leandrohsilveira.specfy.exceptions.http.server.ServiceUnavaila
 public abstract class ResponseException extends Exception {
 
 	private static final long serialVersionUID = -4737642975124215055L;
-	private RequestSpec requestSpec;
 
-	public ResponseException(RequestSpec requestSpec) {
-		super(requestSpec.getResponse().getStatusText());
-		this.requestSpec = requestSpec;
+	public ResponseException(Response response) {
+		super(response.getStatusText());
+		this.response = response;
 	}
 
-	public RequestSpec getRequestSpec() {
-		return requestSpec;
+	private Response response;
+
+	public Response getResponse() {
+		return response;
 	}
 
-	public static void checkResponseStatus(RequestSpec requestSpec) throws ClientError, ServerError {
-		int status = requestSpec.getResponse().getStatus();
+	public static void checkResponseStatus(Response response) throws ClientError, ServerError {
+		int status = response.getStatus();
 		if (status >= 400) {
 			switch (status) {
 				case 400:
-					throw new BadRequest(requestSpec);
+					throw new BadRequest(response);
 				case 401:
-					throw new Unauthorized(requestSpec);
+					throw new Unauthorized(response);
 				case 402:
-					throw new PaymentRequired(requestSpec);
+					throw new PaymentRequired(response);
 				case 403:
-					throw new Forbidden(requestSpec);
+					throw new Forbidden(response);
 				case 404:
-					throw new NotFound(requestSpec);
+					throw new NotFound(response);
 				case 405:
-					throw new MethodNotAllowed(requestSpec);
+					throw new MethodNotAllowed(response);
 				case 406:
-					throw new NotAcceptable(requestSpec);
+					throw new NotAcceptable(response);
 				case 407:
-					throw new ProxyAuthenticationRequired(requestSpec);
+					throw new ProxyAuthenticationRequired(response);
 				case 408:
-					throw new RequestTimeout(requestSpec);
+					throw new RequestTimeout(response);
 				case 409:
-					throw new Conflict(requestSpec);
+					throw new Conflict(response);
 				case 410:
-					throw new Gone(requestSpec);
+					throw new Gone(response);
 				case 411:
-					throw new LengthRequired(requestSpec);
+					throw new LengthRequired(response);
 				case 412:
-					throw new PreconditionFailed(requestSpec);
+					throw new PreconditionFailed(response);
 				case 413:
-					throw new RequestEntityTooLarge(requestSpec);
+					throw new RequestEntityTooLarge(response);
 				case 414:
-					throw new RequestURITooLong(requestSpec);
+					throw new RequestURITooLong(response);
 				case 415:
-					throw new UnsupportedMediaType(requestSpec);
+					throw new UnsupportedMediaType(response);
 				case 416:
-					throw new RequestedRangeNotSatisfiable(requestSpec);
+					throw new RequestedRangeNotSatisfiable(response);
 				case 417:
-					throw new ExpectationFailed(requestSpec);
+					throw new ExpectationFailed(response);
 
 				case 500:
-					throw new InternalServerError(requestSpec);
+					throw new InternalServerError(response);
 				case 501:
-					throw new NotImplemented(requestSpec);
+					throw new NotImplemented(response);
 				case 502:
-					throw new BadGateway(requestSpec);
+					throw new BadGateway(response);
 				case 503:
-					throw new ServiceUnavailable(requestSpec);
+					throw new ServiceUnavailable(response);
 				case 504:
-					throw new GatewayTimeout(requestSpec);
+					throw new GatewayTimeout(response);
 				case 505:
-					throw new HTTPVersionNotSupported(requestSpec);
+					throw new HTTPVersionNotSupported(response);
 
 				default:
 					throw new UnknownError("Unknown HTTP Error Status " + status);

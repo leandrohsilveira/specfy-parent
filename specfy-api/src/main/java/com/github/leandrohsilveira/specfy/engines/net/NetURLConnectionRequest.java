@@ -1,6 +1,7 @@
 package com.github.leandrohsilveira.specfy.engines.net;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -9,24 +10,18 @@ import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
-import com.github.leandrohsilveira.specfy.Request;
+import com.github.leandrohsilveira.specfy.AbstractRequest;
 import com.github.leandrohsilveira.specfy.RequestMethod;
+import com.github.leandrohsilveira.specfy.RequestSpec;
 import com.github.leandrohsilveira.specfy.Response;
-import com.github.leandrohsilveira.specfy.Serializer;
 
-public class NetURLConnectionRequest implements Request {
+public class NetURLConnectionRequest extends AbstractRequest {
 
-	protected Charset charset;
 	protected HttpURLConnection connection;
 
-	public NetURLConnectionRequest(String url, Charset charset) throws IOException {
+	public NetURLConnectionRequest(RequestSpec requestSpec, String url, Charset charset) throws IOException {
+		super(requestSpec, charset);
 		this.connection = (HttpURLConnection) new URL(url).openConnection();
-		this.charset = charset;
-	}
-
-	@Override
-	public Charset getCharset() {
-		return this.charset;
 	}
 
 	@Override
@@ -47,9 +42,9 @@ public class NetURLConnectionRequest implements Request {
 	}
 
 	@Override
-	public void writeBody(Serializer serializer, Object content) throws IOException {
+	public OutputStream getBody() throws IOException {
 		this.connection.setDoOutput(true);
-		serializer.serialize(content, this.connection.getOutputStream(), charset);
+		return this.connection.getOutputStream();
 	}
 
 	@Override
@@ -67,7 +62,7 @@ public class NetURLConnectionRequest implements Request {
 	}
 
 	@Override
-	public Response getResponse() {
+	public Response createResponse() {
 		return new NetURLConnectionResponse(this.connection);
 	}
 

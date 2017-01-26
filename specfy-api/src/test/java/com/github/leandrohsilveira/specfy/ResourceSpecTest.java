@@ -12,7 +12,6 @@ public class ResourceSpecTest {
 
 	private static final String NUMBER_REGEX = "^\\d+$";
 	private RESTfulClientSpec root = new RESTfulClientSpec("/api");
-	private static final String CONTENT_TYPE = "application/www-form-urlencoded";
 
 	@Test
 	public void teste() {
@@ -32,7 +31,7 @@ public class ResourceSpecTest {
 		ResourceActionSpec findAllUsers = root.resource("users").isGET();
 		assertEquals("GET /api/users", findAllUsers.toString());
 
-		ResourceActionSpec createUser = findAllUsers.subResource().isPOST(CONTENT_TYPE);
+		ResourceActionSpec createUser = findAllUsers.subResource().isPOST();
 		assertEquals("POST /api/users", createUser.toString());
 
 		ResourceActionSpec getUser = findAllUsers.subResource().pathParameter("userId", NUMBER_REGEX).isGET();
@@ -149,14 +148,8 @@ public class ResourceSpecTest {
 
 	@Test
 	public void requestBodyTest() throws Exception {
-		ResourceActionSpec createUser = root.resource("users").isPOST(CONTENT_TYPE);
-		createUser.newLocalRequest().body(new WwwFormUrlEncoded().bind("username", "test").bind("password", "test123")).validate();
-	}
-
-	@Test(expected = ValidationException.class)
-	public void requiredRequestBodyNotBoundTest() throws Exception {
-		ResourceActionSpec createUser = root.resource("users").isPOST(CONTENT_TYPE);
-		createUser.newLocalRequest().validate();
+		ResourceActionSpec createUser = root.resource("users").isPOST();
+		createUser.newLocalRequest().build().serialize(new WwwFormUrlEncoded().bind("username", "test").bind("password", "test123"));
 	}
 
 }

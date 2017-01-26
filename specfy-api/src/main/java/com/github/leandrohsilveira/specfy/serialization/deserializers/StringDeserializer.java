@@ -8,17 +8,7 @@ import org.apache.commons.io.IOUtils;
 
 import com.github.leandrohsilveira.specfy.Deserializer;
 
-public class DefaultStringDeserializer implements Deserializer {
-
-	@Override
-	public Class<String> getSerializableClass() {
-		return String.class;
-	}
-
-	@Override
-	public String getContentType() {
-		return "text/plain";
-	}
+public class StringDeserializer implements Deserializer {
 
 	@Override
 	@SuppressWarnings("unchecked")

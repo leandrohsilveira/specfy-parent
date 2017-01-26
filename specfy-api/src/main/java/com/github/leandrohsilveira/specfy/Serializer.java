@@ -6,10 +6,6 @@ import java.nio.charset.Charset;
 
 public interface Serializer {
 
-	Class<?> getSerializableClass();
-
-	String getContentType();
-
 	void serialize(Object obj, OutputStream requestBody, Charset charset) throws IOException;
 
 }

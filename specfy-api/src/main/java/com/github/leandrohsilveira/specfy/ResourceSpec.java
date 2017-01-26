@@ -12,7 +12,6 @@ public class ResourceSpec extends Composer {
 	protected RESTfulClientSpec client;
 	protected String resource;
 	protected Map<String, ParameterSpec> parameters;
-	protected String contentType;
 
 	protected ResourceSpec(RESTfulClientSpec client, String resource) {
 		this.client = client;
@@ -35,29 +34,20 @@ public class ResourceSpec extends Composer {
 		return new ResourceActionSpec(this, RequestMethod.OPTIONS);
 	}
 
-	public ResourceActionSpec isPOST(String contentType) {
-		this.contentType = contentType;
+	public ResourceActionSpec isPOST() {
 		return new ResourceActionSpec(this, RequestMethod.POST);
 	}
 
-	public ResourceActionSpec isPUT(String contentType) {
-		this.contentType = contentType;
+	public ResourceActionSpec isPUT() {
 		return new ResourceActionSpec(this, RequestMethod.PUT);
 	}
 
-	public ResourceActionSpec isPATCH(String contentType) {
-		this.contentType = contentType;
+	public ResourceActionSpec isPATCH() {
 		return new ResourceActionSpec(this, RequestMethod.PATCH);
 	}
 
 	public ResourceActionSpec isDELETE() {
 		return new ResourceActionSpec(this, RequestMethod.DELETE);
-	}
-
-	public Serializer getSerializer() {
-		if (contentType != null)
-			return client.getSerializer(contentType);
-		return null;
 	}
 
 	private ResourceSpec attribute(ParameterSpec parameterSpec) {
@@ -140,10 +130,6 @@ public class ResourceSpec extends Composer {
 	@Override
 	protected String compose() {
 		return SpecfyUtils.safeConcat(client.resourcesRoot, resource);
-	}
-
-	public boolean isBodyRequired() {
-		return contentType != null;
 	}
 
 }
