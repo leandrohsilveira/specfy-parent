@@ -4,9 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.charset.Charset;
+import java.util.Arrays;
+
 import org.junit.Test;
 
 public class SpecfyUtilsTest {
+
+	private static final Charset CHARSET = Charset.forName("UTF-8");
 
 	@Test
 	public void safeConcat_Test() {
@@ -122,5 +127,41 @@ public class SpecfyUtilsTest {
 	public void startsWithDash_middleDashesDontMatter_Test() {
 		assertTrue(SpecfyUtils.startsWithDash("/ends/with/dash"));
 		assertFalse(SpecfyUtils.startsWithDash("ends/with/dash"));
+	}
+
+	@Test
+	public void appendQueryParameter_varArgs_Test() throws Exception {
+		String url = SpecfyUtils.appendQueryParameter("https://github.com/leandrohsilveira/specfy-parent", "test", CHARSET, "value");
+		assertEquals("https://github.com/leandrohsilveira/specfy-parent?test=value", url);
+	}
+
+	@Test
+	public void appendQueryParameter_varArgs_multipleValues_Test() throws Exception {
+		String url = SpecfyUtils.appendQueryParameter("https://github.com/leandrohsilveira/specfy-parent", "test", CHARSET, "value1", "value2");
+		assertEquals("https://github.com/leandrohsilveira/specfy-parent?test=value1&test=value2", url);
+	}
+
+	@Test
+	public void appendQueryParameter_varArgs_urlEncoding_Test() throws Exception {
+		String url = SpecfyUtils.appendQueryParameter("https://github.com/leandrohsilveira/specfy-parent", "test", CHARSET, "value 1");
+		assertEquals("https://github.com/leandrohsilveira/specfy-parent?test=value+1", url);
+	}
+
+	@Test
+	public void appendQueryParameter_list_Test() throws Exception {
+		String url = SpecfyUtils.appendQueryParameter("https://github.com/leandrohsilveira/specfy-parent", "test", Arrays.asList("value"), CHARSET);
+		assertEquals("https://github.com/leandrohsilveira/specfy-parent?test=value", url);
+	}
+
+	@Test
+	public void appendQueryParameter_list_multipleValues_Test() throws Exception {
+		String url = SpecfyUtils.appendQueryParameter("https://github.com/leandrohsilveira/specfy-parent", "test", Arrays.asList("value1", "value2"), CHARSET);
+		assertEquals("https://github.com/leandrohsilveira/specfy-parent?test=value1&test=value2", url);
+	}
+
+	@Test
+	public void appendQueryParameter_list_urlEncoding_Test() throws Exception {
+		String url = SpecfyUtils.appendQueryParameter("https://github.com/leandrohsilveira/specfy-parent", "test", Arrays.asList("value 1"), CHARSET);
+		assertEquals("https://github.com/leandrohsilveira/specfy-parent?test=value+1", url);
 	}
 }
