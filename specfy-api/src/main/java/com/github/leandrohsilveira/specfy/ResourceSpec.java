@@ -113,16 +113,20 @@ public class ResourceSpec extends Composer {
 	}
 
 	public ResourceSpec inherits(ResourceActionSpec resourceActionToInherit, String... parametersNamesToInherit) {
-		for (String parameterName : parametersNamesToInherit) {
-			attribute(resourceActionToInherit.resourceSpec.parameters.get(parameterName));
+		if (resourceActionToInherit != null && resourceActionToInherit.resourceSpec.parameters != null) {
+			for (String parameterName : parametersNamesToInherit) {
+				attribute(resourceActionToInherit.resourceSpec.parameters.get(parameterName));
+			}
 		}
 		return this;
 	}
 
 	public ResourceSpec inheritsAll(ResourceActionSpec resourceActionToInherit) {
-		for (Entry<String, ParameterSpec> entry : resourceActionToInherit.resourceSpec.parameters.entrySet()) {
-			if (entry.getValue().type != ParameterType.PATH)
-				attribute(entry.getValue());
+		if (resourceActionToInherit != null && resourceActionToInherit.resourceSpec.parameters != null) {
+			for (Entry<String, ParameterSpec> entry : resourceActionToInherit.resourceSpec.parameters.entrySet()) {
+				if (entry.getValue().type != ParameterType.PATH)
+					attribute(entry.getValue());
+			}
 		}
 		return this;
 	}
