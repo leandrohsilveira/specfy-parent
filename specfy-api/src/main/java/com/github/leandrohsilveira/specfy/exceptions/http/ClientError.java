@@ -11,4 +11,8 @@ public abstract class ClientError extends ResponseException {
 		super(request);
 	}
 
+	public ClientError(Throwable throwable) {
+		super(throwable);
+	}
+
 }

@@ -11,4 +11,8 @@ public class ServiceUnavailable extends ServerError {
 		super(request);
 	}
 
+	public ServiceUnavailable(Throwable throwable) {
+		super(throwable);
+	}
+
 }

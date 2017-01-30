@@ -2,12 +2,17 @@ package com.github.leandrohsilveira.specfy.engines.net;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 
 import com.github.leandrohsilveira.specfy.Header;
 import com.github.leandrohsilveira.specfy.Response;
+import com.github.leandrohsilveira.specfy.exceptions.http.ClientError;
+import com.github.leandrohsilveira.specfy.exceptions.http.ServerError;
+import com.github.leandrohsilveira.specfy.exceptions.http.client.SSLException;
+import com.github.leandrohsilveira.specfy.exceptions.http.server.ServiceUnavailable;
 
 public class NetURLConnectionResponse implements Response {
 
@@ -17,7 +22,7 @@ public class NetURLConnectionResponse implements Response {
 	private Map<String, List<String>> headers;
 	private HttpURLConnection connection;
 
-	public NetURLConnectionResponse(HttpURLConnection connection) {
+	public NetURLConnectionResponse(HttpURLConnection connection) throws ClientError, ServerError {
 		try {
 			this.connection = connection;
 			this.connection.connect();
@@ -25,6 +30,10 @@ public class NetURLConnectionResponse implements Response {
 			this.statusText = this.connection.getResponseMessage();
 			this.headers = this.connection.getHeaderFields();
 			this.body = this.connection.getInputStream();
+		} catch (ConnectException e) {
+			throw new ServiceUnavailable(e);
+		} catch (javax.net.ssl.SSLException e) {
+			throw new SSLException(e);
 		} catch (IOException e) {
 			this.body = this.connection.getErrorStream();
 		}

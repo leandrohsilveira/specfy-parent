@@ -14,6 +14,8 @@ import com.github.leandrohsilveira.specfy.AbstractRequest;
 import com.github.leandrohsilveira.specfy.RequestMethod;
 import com.github.leandrohsilveira.specfy.RequestSpec;
 import com.github.leandrohsilveira.specfy.Response;
+import com.github.leandrohsilveira.specfy.exceptions.http.ClientError;
+import com.github.leandrohsilveira.specfy.exceptions.http.ServerError;
 
 public class NetURLConnectionRequest extends AbstractRequest {
 
@@ -66,7 +68,7 @@ public class NetURLConnectionRequest extends AbstractRequest {
 	}
 
 	@Override
-	public Response createResponse() {
+	public Response createResponse() throws ClientError, ServerError {
 		return new NetURLConnectionResponse(this.connection);
 	}
 

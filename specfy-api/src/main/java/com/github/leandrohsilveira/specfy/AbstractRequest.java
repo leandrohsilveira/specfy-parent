@@ -32,7 +32,7 @@ public abstract class AbstractRequest implements Request {
 
 	public abstract void addCookieValues(String key, List<Object> value);
 
-	public abstract Response createResponse();
+	public abstract Response createResponse() throws ClientError, ServerError;
 
 	@Override
 	public Request serialize(Object object) throws IOException {

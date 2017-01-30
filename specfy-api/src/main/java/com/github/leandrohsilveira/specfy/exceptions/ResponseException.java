@@ -33,8 +33,12 @@ public abstract class ResponseException extends Exception {
 	private static final long serialVersionUID = -4737642975124215055L;
 
 	public ResponseException(Request request) {
-		super(request.getResponse().getStatusText());
+		super(request.getResponse() != null ? request.getResponse().getStatusText() : "Unknown Error");
 		this.request = request;
+	}
+
+	public ResponseException(Throwable throwable) {
+		super(throwable);
 	}
 
 	private Request request;

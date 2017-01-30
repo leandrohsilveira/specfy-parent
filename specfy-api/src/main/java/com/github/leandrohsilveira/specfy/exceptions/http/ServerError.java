@@ -11,4 +11,8 @@ public class ServerError extends ResponseException {
 		super(request);
 	}
 
+	public ServerError(Throwable throwable) {
+		super(throwable);
+	}
+
 }
