@@ -20,9 +20,11 @@ import com.github.leandrohsilveira.specfy.exceptions.http.ServerError;
 public class NetURLConnectionRequest extends AbstractRequest {
 
 	protected HttpURLConnection connection;
+	private String url;
 
 	public NetURLConnectionRequest(RequestSpec requestSpec, String url, Charset charset) throws IOException {
 		super(requestSpec, charset);
+		this.url = url;
 		this.connection = (HttpURLConnection) new URL(url).openConnection();
 	}
 
@@ -70,6 +72,11 @@ public class NetURLConnectionRequest extends AbstractRequest {
 	@Override
 	public Response createResponse() throws ClientError, ServerError {
 		return new NetURLConnectionResponse(this.connection);
+	}
+
+	@Override
+	public String toString() {
+		return url;
 	}
 
 	@Override
