@@ -49,3 +49,5 @@ Temporary Items
 .classpath
 .settings
 target/
+
+**/*pom.xml.versionsBackup
