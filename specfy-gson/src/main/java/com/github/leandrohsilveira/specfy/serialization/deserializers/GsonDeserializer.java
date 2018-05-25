@@ -15,6 +15,10 @@ public class GsonDeserializer implements Deserializer {
 		this.gsonBuilder = gsonBuilder;
 	}
 	
+	public GsonDeserializer() {
+		this(GsonSerializationUtils.getDefaultGsonBuilder());
+	}
+	
 	private GsonBuilder gsonBuilder;
 
 	@Override

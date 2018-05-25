@@ -10,7 +10,7 @@ public class GsonSerializationUtils {
 	}
 
 	public static GsonBuilder getDefaultGsonBuilder() {
-		return new GsonBuilder().setDateFormat(GsonSerializationUtils.DEFAULT_DATE_FORMAT);
+		return new GsonBuilder().setDateFormat(GsonSerializationUtils.DEFAULT_DATE_FORMAT).disableHtmlEscaping();
 	}
 	
 }
