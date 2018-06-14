@@ -13,9 +13,9 @@
 
 	<distributionManagement>
 		<repository>
-			<id>public</id>
-			<name>BRy Public</name>
-			<url>https://nexus.bry.com.br/content/groups/public</url>
+			<id>third.party</id>
+			<name>BRy Third Party</name>
+			<url>https://nexus.bry.com.br/content/groups/thirdparty</url>
 		</repository>
 
 		<snapshotRepository>
