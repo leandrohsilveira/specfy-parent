@@ -54,7 +54,7 @@ public class GsonSerializationTest {
 		}
 
 		try (FileInputStream inputStream = new FileInputStream(file)) {
-			assertEquals(GsonSerializationUtils.GSON.toJson(object), IOUtils.toString(inputStream, CHARSET));
+			assertEquals(GsonSerializationUtils.getDefaultGsonBuilder().create().toJson(object), IOUtils.toString(inputStream, CHARSET));
 		}
 	}
 
